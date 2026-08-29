@@ -200,7 +200,7 @@ CutieWindow {
 		height: progressColumn.height + 24
 		radius: 12
 		
-		color: Atmosphere.backgroundColor
+		color: Atmosphere.secondaryAlphaColor
 		border.color: Atmosphere.primaryAlphaColor
 		border.width: 1
 
