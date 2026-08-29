@@ -13,9 +13,14 @@ CutieWindow {
 
 	property var folderComponent: Qt.createComponent("FolderView.qml")
 
-	// Quick-access shortcuts - the standard XDG user directories, resolved
-	// at runtime rather than hardcoded so they still work if the user has
-	// remapped them in user-dirs.dirs.
+	// State properties to track background file operations
+	property bool isTransferring: false
+	property real transferBytesCopied: 0
+	property real transferBytesTotal: 0
+	property int transferFilesCopied: 0
+	property int transferFilesTotal: 0
+
+	// Quick-access shortcuts - the standard XDG user directories
 	property var places: [
 		{ text: qsTr("Home"), icon: "user-home-symbolic", path: Formatting.urlToPath(Labs.StandardPaths.writableLocation(Labs.StandardPaths.HomeLocation)) },
 		{ text: qsTr("Desktop"), icon: "user-desktop-symbolic", path: Formatting.urlToPath(Labs.StandardPaths.writableLocation(Labs.StandardPaths.DesktopLocation)) },
@@ -30,6 +35,31 @@ CutieWindow {
 		if (mainWindow.folderComponent.status === Component.Ready) {
 			mainWindow.pageStack.push(mainWindow.folderComponent,
 				{ crumbs: [{ label: label, path: path }] });
+		}
+	}
+
+	// Listen to C++ background worker signals
+	Connections {
+		target: FileOperations
+		
+		function onOperationStarted() {
+			mainWindow.transferBytesCopied = 0;
+			mainWindow.transferBytesTotal = 0;
+			mainWindow.transferFilesCopied = 0;
+			mainWindow.transferFilesTotal = 0;
+			mainWindow.isTransferring = true;
+		}
+		
+		function onOperationProgress(bytesCopied, totalBytes, filesCopied, totalFiles) {
+			mainWindow.transferBytesCopied = bytesCopied;
+			mainWindow.transferBytesTotal = totalBytes;
+			mainWindow.transferFilesCopied = filesCopied;
+			mainWindow.transferFilesTotal = totalFiles;
+		}
+		
+		function onOperationFinished(success, message) {
+			mainWindow.isTransferring = false;
+			// Optional: Trigger a Cutie toast notification here if success === false
 		}
 	}
 
@@ -151,6 +181,69 @@ CutieWindow {
 				}
 
 				Item { width: 1; height: 16 }
+			}
+		}
+	}
+
+	// ── Global Progress Info Card ──────────────────────────────────────────
+	// Overlays on top of the UI at the bottom of the window
+	Rectangle {
+		id: progressCard
+		visible: mainWindow.isTransferring
+		
+		anchors.bottom: parent.bottom
+		anchors.bottomMargin: 24
+		anchors.left: parent.left
+		anchors.right: parent.right
+		anchors.margins: 16
+		
+		height: progressColumn.height + 24
+		radius: 12
+		
+		color: Atmosphere.backgroundColor
+		border.color: Atmosphere.primaryAlphaColor
+		border.width: 1
+
+		Column {
+			id: progressColumn
+			anchors.centerIn: parent
+			width: parent.width - 32
+			spacing: 10
+
+			CutieLabel {
+				text: qsTr("Transferring %1 of %2 items")
+					.arg(mainWindow.transferFilesCopied)
+					.arg(mainWindow.transferFilesTotal)
+				font.bold: true
+				color: Atmosphere.textColor
+			}
+
+			// Reuses the styling of the DriveManager usage bar
+			Rectangle {
+				width: parent.width
+				height: 6
+				radius: 3
+				color: Atmosphere.primaryAlphaColor
+				opacity: 1
+
+				Rectangle {
+					height: parent.height
+					radius: 3
+					color: Atmosphere.textColor
+					// Calculate width dynamically, guarding against division by zero
+					width: mainWindow.transferBytesTotal > 0 
+						? parent.width * (mainWindow.transferBytesCopied / mainWindow.transferBytesTotal) 
+						: 0
+				}
+			}
+
+			// Size summary: e.g. "1.2MB / 50MB"
+			CutieLabel {
+				text: qsTr("%1 / %2")
+					.arg(Formatting.humanSize(mainWindow.transferBytesCopied))
+					.arg(Formatting.humanSize(mainWindow.transferBytesTotal))
+				opacity: 0.85
+				font.pixelSize: 12
 			}
 		}
 	}
