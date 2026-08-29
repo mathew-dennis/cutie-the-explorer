@@ -68,6 +68,12 @@ CutiePage {
 		propertiesDialog.open();
 	}
 
+	function handleDelete(name, path) {
+		deleteDialog.targetName = name;
+		deleteDialog.targetPath = path;
+		deleteDialog.open();
+	}
+
 	FolderListModel {
 		id: dirModel
 		folder: "file://" + folderView.folderPath
@@ -195,6 +201,7 @@ CutiePage {
 				targetModified: fileModified
 				onRenameRequested: folderView.handleRename(name, path)
 				onPropertiesRequested: folderView.handleProperties(name, path, isDir, size, modified)
+				onDeleteRequested: folderView.handleDelete(name, path)
 			}
 		}
 	}
@@ -257,6 +264,7 @@ CutiePage {
 				targetModified: fileModified
 				onRenameRequested: folderView.handleRename(name, path)
 				onPropertiesRequested: folderView.handleProperties(name, path, isDir, size, modified)
+				onDeleteRequested: folderView.handleDelete(name, path)
 			}
 		}
 	}
@@ -267,5 +275,26 @@ CutiePage {
 
 	PropertiesDialog {
 		id: propertiesDialog
+	}
+
+	Dialog {
+		id: deleteDialog
+		title: qsTr("Delete")
+		modal: true
+		standardButtons: Dialog.Yes | Dialog.No
+		anchors.centerIn: parent
+
+		property string targetName: ""
+		property string targetPath: ""
+
+		contentItem: CutieLabel {
+			text: qsTr("Are you sure you want to permanently delete '%1'?").arg(deleteDialog.targetName)
+			wrapMode: Text.Wrap
+			width: 250
+		}
+
+		onAccepted: {
+			FileOperations.deletePath(deleteDialog.targetPath);
+		}
 	}
 }
