@@ -141,13 +141,17 @@ CutieWindow {
 							anchors.margins: 8
 							spacing: 7
 
-							Image {
+							CutieButton {
 								width: 24
 								height: 24
 								anchors.verticalCenter: parent.verticalCenter
-								source: "image://theme/text-x-generic-symbolic"
-								sourceSize.width: 24
-								sourceSize.height: 24
+								icon.name: "text-x-generic-symbolic"
+								icon.color: Atmosphere.textColor
+								icon.width: 24
+								icon.height: 24
+								background: null
+								enabled: false
+								padding: 0
 							}
 
 							Column {
@@ -209,11 +213,17 @@ CutieWindow {
 							Row {
 								spacing: 10
 
-								Image {
+								CutieButton {
+									width: 20
+									height: 20
 									anchors.verticalCenter: parent.verticalCenter
-									source: "image://theme/drive-removable-media-symbolic"
-									sourceSize.width: 20
-									sourceSize.height: 20
+									icon.name: "drive-removable-media-symbolic"
+									icon.color: Atmosphere.textColor
+									icon.width: 20
+									icon.height: 20
+									background: null
+									enabled: false
+									padding: 0
 								}
 								CutieLabel {
 									anchors.verticalCenter: parent.verticalCenter
