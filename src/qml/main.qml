@@ -130,13 +130,50 @@ CutieWindow {
 					clip: true
 					model: RecentFiles.entries
 
-					delegate: CutieListItem {
+					delegate: Rectangle {
 						width: 136
-						text: modelData.name
-						subText: Formatting.relativeTime(modelData.activityTime)
-						icon.name: "text-x-generic-symbolic"
-						icon.color: Atmosphere.textColor
-						onClicked: mainWindow.openFile(modelData.path)
+						height: 64
+						radius: 8
+						color: Atmosphere.secondaryAlphaColor
+
+						Row {
+							anchors.fill: parent
+							anchors.margins: 8
+							spacing: 7
+
+							Image {
+								width: 24
+								height: 24
+								anchors.verticalCenter: parent.verticalCenter
+								source: "image://theme/text-x-generic-symbolic"
+								sourceSize.width: 24
+								sourceSize.height: 24
+							}
+
+							Column {
+								width: parent.width - 31
+								anchors.verticalCenter: parent.verticalCenter
+								spacing: 3
+
+								CutieLabel {
+									width: parent.width
+									text: modelData.name
+									elide: Text.ElideRight
+									font.pixelSize: 11
+								}
+								CutieLabel {
+									width: parent.width
+									text: Formatting.relativeTime(modelData.activityTime)
+									font.pixelSize: 10
+									opacity: 0.75
+								}
+							}
+						}
+
+						MouseArea {
+							anchors.fill: parent
+							onClicked: mainWindow.openFile(modelData.path)
+						}
 					}
 				}
 
@@ -169,11 +206,20 @@ CutieWindow {
 							width: parent.width - 40
 							spacing: 6
 
-							CutieListItem {
-								width: parent.width
-								text: modelData.name
-								icon.name: "drive-removable-media-symbolic"
-								icon.color: Atmosphere.textColor
+							Row {
+								spacing: 10
+
+								Image {
+									anchors.verticalCenter: parent.verticalCenter
+									source: "image://theme/drive-removable-media-symbolic"
+									sourceSize.width: 20
+									sourceSize.height: 20
+								}
+								CutieLabel {
+									anchors.verticalCenter: parent.verticalCenter
+									text: modelData.name
+									color: Atmosphere.textColor
+								}
 							}
 
 							// Usage bar - white fill over a dim track,

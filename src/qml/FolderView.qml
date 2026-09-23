@@ -252,17 +252,11 @@ CutiePage {
 				anchors.centerIn: parent
 				spacing: 6
 
-				CutieButton {
-					width: 64
-					height: 64
+				Image {
 					anchors.horizontalCenter: parent.horizontalCenter
-					icon.name: fileIsDir ? "folder-symbolic" : "text-x-generic-symbolic"
-					icon.color: Atmosphere.textColor
-					icon.width: 64
-					icon.height: 64
-					background: null
-					enabled: false
-					padding: 0
+					source: "image://theme/" + (fileIsDir ? "folder" : "text-x-generic")
+					sourceSize.width: 64
+					sourceSize.height: 64
 				}
 
 				CutieLabel {
