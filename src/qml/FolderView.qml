@@ -20,6 +20,9 @@ CutiePage {
 	readonly property string folderName: crumbs.length ? crumbs[crumbs.length - 1].label : ""
 
 	property var folderComponent: Qt.createComponent("FolderView.qml")
+	property string pendingPasteSource: ""
+	property string pendingPasteFolder: ""
+	property string pendingPasteMode: ""
 
 	// View mode persists via Qt.labs.settings, so it's remembered the next
 	// time the app opens - shared across all FolderView instances since
@@ -72,6 +75,26 @@ CutiePage {
 		deleteDialog.targetName = name;
 		deleteDialog.targetPath = path;
 		deleteDialog.open();
+	}
+
+	function handlePasteConflict(sourcePath, destFolder, mode) {
+		pendingPasteSource = sourcePath;
+		pendingPasteFolder = destFolder;
+		pendingPasteMode = mode;
+		replaceDialog.open();
+	}
+
+	function finishPaste(replace) {
+		if (replace) {
+			if (pendingPasteMode === "cut")
+				FileOperations.movePath(pendingPasteSource, pendingPasteFolder);
+			else
+				FileOperations.copyPath(pendingPasteSource, pendingPasteFolder);
+		}
+		FileClipboard.clear();
+		pendingPasteSource = "";
+		pendingPasteFolder = "";
+		pendingPasteMode = "";
 	}
 
 	FolderListModel {
@@ -202,6 +225,7 @@ CutiePage {
 				onRenameRequested: folderView.handleRename(name, path)
 				onPropertiesRequested: folderView.handleProperties(name, path, isDir, size, modified)
 				onDeleteRequested: folderView.handleDelete(name, path)
+				onPasteConflictRequested: folderView.handlePasteConflict(sourcePath, destFolder, mode)
 			}
 		}
 	}
@@ -265,6 +289,7 @@ CutiePage {
 				onRenameRequested: folderView.handleRename(name, path)
 				onPropertiesRequested: folderView.handleProperties(name, path, isDir, size, modified)
 				onDeleteRequested: folderView.handleDelete(name, path)
+				onPasteConflictRequested: folderView.handlePasteConflict(sourcePath, destFolder, mode)
 			}
 		}
 	}
@@ -295,6 +320,39 @@ CutiePage {
 
 		onAccepted: {
 			FileOperations.deletePath(deleteDialog.targetPath);
+		}
+	}
+
+	Dialog {
+		id: replaceDialog
+		title: qsTr("File already exists")
+		modal: true
+		anchors.centerIn: parent
+
+		contentItem: CutieLabel {
+			text: qsTr("'%1' already exists here. Replace it or skip this paste?")
+				.arg(folderView.pendingPasteSource.split("/").pop())
+			wrapMode: Text.Wrap
+			width: 250
+		}
+
+		footer: DialogButtonBox {
+			Button {
+				text: qsTr("Skip")
+				DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+				onClicked: {
+					folderView.finishPaste(false);
+					replaceDialog.close();
+				}
+			}
+			Button {
+				text: qsTr("Replace")
+				DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
+				onClicked: {
+					folderView.finishPaste(true);
+					replaceDialog.close();
+				}
+			}
 		}
 	}
 }

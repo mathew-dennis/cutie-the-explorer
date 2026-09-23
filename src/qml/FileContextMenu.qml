@@ -22,6 +22,21 @@ CutieMenu {
 	signal renameRequested(string name, string path)
 	signal propertiesRequested(string name, string path, bool isDir, real size, var modified)
 	signal deleteRequested(string name, string path)
+	signal pasteConflictRequested(string sourcePath, string destFolder, string mode)
+
+	function paste() {
+		if (FileOperations.destinationExists(FileClipboard.sourcePath, fileMenu.currentFolder)) {
+			fileMenu.pasteConflictRequested(FileClipboard.sourcePath,
+				fileMenu.currentFolder, FileClipboard.mode);
+			return;
+		}
+
+		if (FileClipboard.mode === "cut")
+			FileOperations.movePath(FileClipboard.sourcePath, fileMenu.currentFolder);
+		else
+			FileOperations.copyPath(FileClipboard.sourcePath, fileMenu.currentFolder);
+		FileClipboard.clear();
+	}
 
 	CutieMenuItem {
 		text: qsTr("Cut")
@@ -34,13 +49,7 @@ CutieMenu {
 	CutieMenuItem {
 		text: qsTr("Paste")
 		enabled: FileClipboard.hasContent
-		onTriggered: {
-			if (FileClipboard.mode === "cut")
-				FileOperations.movePath(FileClipboard.sourcePath, fileMenu.currentFolder);
-			else
-				FileOperations.copyPath(FileClipboard.sourcePath, fileMenu.currentFolder);
-			FileClipboard.clear();
-		}
+		onTriggered: fileMenu.paste()
 	}
 	CutieMenuItem {
 		text: qsTr("Delete")

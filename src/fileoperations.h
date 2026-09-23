@@ -59,6 +59,7 @@ public:
 	// Number of entries directly inside path (not recursive), for the
 	// "N items" subtitle on folder rows. Returns -1 if path can't be read.
 	Q_INVOKABLE int entryCount(const QString &path) const;
+	Q_INVOKABLE bool destinationExists(const QString &sourcePath, const QString &destDir) const;
 
 Q_SIGNALS:
 	void operationFailed(const QString &message);

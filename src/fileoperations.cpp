@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QSaveFile>
 
 // ==========================================
 // FileWorker Implementation
@@ -31,7 +32,7 @@ void FileWorker::calculateTotals(const QString &path)
 bool FileWorker::copyFileChunked(const QString &src, const QString &dest)
 {
 	QFile srcFile(src);
-	QFile destFile(dest);
+	QSaveFile destFile(dest);
 
 	if (!srcFile.open(QIODevice::ReadOnly))
 		return false;
@@ -44,17 +45,28 @@ bool FileWorker::copyFileChunked(const QString &src, const QString &dest)
 
 	while (!srcFile.atEnd()) {
 		buffer = srcFile.read(chunkSize);
-		if (buffer.isEmpty()) break;
+		if (buffer.isEmpty()) {
+			if (srcFile.error() != QFileDevice::NoError)
+				return false;
+			break;
+		}
 
-		qint64 written = destFile.write(buffer);
-		if (written < 0) return false;
+		qint64 chunkWritten = 0;
+		while (chunkWritten < buffer.size()) {
+			const qint64 written = destFile.write(buffer.constData() + chunkWritten,
+				buffer.size() - chunkWritten);
+			if (written <= 0)
+				return false;
+			chunkWritten += written;
+		}
 
-		m_copiedBytes += written;
+		m_copiedBytes += chunkWritten;
 		Q_EMIT progress(m_copiedBytes, m_totalBytes, m_copiedFiles, m_totalFiles);
 	}
 
 	// Preserve basic permissions
-	destFile.setPermissions(srcFile.permissions());
+	if (!destFile.setPermissions(srcFile.permissions()) || !destFile.commit())
+		return false;
 	
 	m_copiedFiles++;
 	Q_EMIT progress(m_copiedBytes, m_totalBytes, m_copiedFiles, m_totalFiles);
@@ -78,9 +90,6 @@ bool FileWorker::copyRecursively(const QString &src, const QString &dest)
 		}
 		return true;
 	}
-
-	if (QFile::exists(dest))
-		QFile::remove(dest);
 
 	return copyFileChunked(src, dest);
 }
@@ -250,4 +259,10 @@ int FileOperations::entryCount(const QString &path) const
 	if (!dir.exists())
 		return -1;
 	return dir.entryList(QDir::AllEntries | QDir::NoDotAndDotDot).count();
+}
+
+bool FileOperations::destinationExists(const QString &sourcePath, const QString &destDir) const
+{
+	const QString name = QFileInfo(sourcePath).fileName();
+	return QFileInfo::exists(QDir(destDir).filePath(name));
 }
