@@ -11,6 +11,8 @@ set(cutie-explorer_SOURCES
 	src/main.cpp
 	src/drivemanager.cpp
 	src/fileoperations.cpp
+	src/recentfiles.h
+	src/recentfiles.cpp
 )
 
 qt_add_resources(APP_RESOURCES
