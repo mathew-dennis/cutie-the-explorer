@@ -210,7 +210,7 @@ CutiePage {
 				if (fileIsDir)
 					folderView.openChild(filePath, fileName);
 				else
-					listMenu.open();
+					mainWindow.openFile(filePath);
 			}
 			onPressAndHold: listMenu.open()
 
@@ -225,6 +225,7 @@ CutiePage {
 				onRenameRequested: folderView.handleRename(name, path)
 				onPropertiesRequested: folderView.handleProperties(name, path, isDir, size, modified)
 				onDeleteRequested: folderView.handleDelete(name, path)
+				onOpenRequested: mainWindow.openFile(path)
 				onPasteConflictRequested: folderView.handlePasteConflict(sourcePath, destFolder, mode)
 			}
 		}
@@ -273,7 +274,7 @@ CutiePage {
 					if (fileIsDir)
 						folderView.openChild(filePath, fileName);
 					else
-						gridMenu.open();
+						mainWindow.openFile(filePath);
 				}
 				onPressAndHold: gridMenu.open()
 			}
@@ -289,6 +290,7 @@ CutiePage {
 				onRenameRequested: folderView.handleRename(name, path)
 				onPropertiesRequested: folderView.handleProperties(name, path, isDir, size, modified)
 				onDeleteRequested: folderView.handleDelete(name, path)
+				onOpenRequested: mainWindow.openFile(path)
 				onPasteConflictRequested: folderView.handlePasteConflict(sourcePath, destFolder, mode)
 			}
 		}

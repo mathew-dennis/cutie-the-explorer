@@ -30,3 +30,20 @@ function formatDate(date) {
 		return "";
 	return Qt.formatDateTime(date, "dd/MM/yy h:mm ap");
 }
+
+function relativeTime(date) {
+	if (!date)
+		return "";
+	var minutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+	if (minutes < 1)
+		return qsTr("Just now");
+	if (minutes < 60)
+		return qsTr("%1m ago").arg(minutes);
+	var hours = Math.floor(minutes / 60);
+	if (hours < 24)
+		return qsTr("%1h ago").arg(hours);
+	var days = Math.floor(hours / 24);
+	if (days < 30)
+		return qsTr("%1d ago").arg(days);
+	return Qt.formatDateTime(date, "dd/MM/yy");
+}

@@ -22,6 +22,7 @@ CutieMenu {
 	signal renameRequested(string name, string path)
 	signal propertiesRequested(string name, string path, bool isDir, real size, var modified)
 	signal deleteRequested(string name, string path)
+	signal openRequested(string path)
 	signal pasteConflictRequested(string sourcePath, string destFolder, string mode)
 
 	function paste() {
@@ -38,6 +39,11 @@ CutieMenu {
 		FileClipboard.clear();
 	}
 
+	CutieMenuItem {
+		text: qsTr("Open")
+		visible: !fileMenu.targetIsDir
+		onTriggered: fileMenu.openRequested(fileMenu.targetPath)
+	}
 	CutieMenuItem {
 		text: qsTr("Cut")
 		onTriggered: FileClipboard.cut(fileMenu.targetPath)

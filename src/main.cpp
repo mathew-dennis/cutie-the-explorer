@@ -9,6 +9,7 @@
 
 #include "drivemanager.h"
 #include "fileoperations.h"
+#include "recentfiles.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +31,9 @@ int main(int argc, char *argv[])
 
 	qmlRegisterSingletonType<FileOperations>("CutieExplorer", 1, 0, "FileOperations",
 		[](QQmlEngine *, QJSEngine *) -> QObject * { return new FileOperations(); });
+
+	qmlRegisterSingletonType<RecentFiles>("CutieExplorer", 1, 0, "RecentFiles",
+		[](QQmlEngine *, QJSEngine *) -> QObject * { return new RecentFiles(); });
 
 	// FileClipboard only holds cut/copy state - plain QML is enough, so it's
 	// registered straight from FileClipboard.qml instead of a C++ class.

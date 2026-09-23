@@ -1,9 +1,11 @@
 #include "fileoperations.h"
 
 #include <QDir>
+#include <QDesktopServices>
 #include <QFile>
 #include <QFileInfo>
 #include <QSaveFile>
+#include <QUrl>
 
 // ==========================================
 // FileWorker Implementation
@@ -229,6 +231,11 @@ bool FileOperations::renamePath(const QString &path, const QString &newName)
 		return false;
 	}
 	return true;
+}
+
+bool FileOperations::openPath(const QString &path)
+{
+	return QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
 
 bool FileOperations::deletePath(const QString &path)

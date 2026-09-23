@@ -54,6 +54,8 @@ public:
 
 	// Renames path in place to newName (no path separators allowed).
 	Q_INVOKABLE bool renamePath(const QString &path, const QString &newName);
+	// Opens a file with the system's default application.
+	Q_INVOKABLE bool openPath(const QString &path);
 	Q_INVOKABLE bool deletePath(const QString &path);
 	
 	// Number of entries directly inside path (not recursive), for the

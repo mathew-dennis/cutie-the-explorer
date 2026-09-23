@@ -38,6 +38,16 @@ CutieWindow {
 		}
 	}
 
+	function openFile(path) {
+		if (FileOperations.openPath(path))
+			RecentFiles.logOpen(path);
+	}
+
+	Component.onCompleted: {
+		var folders = mainWindow.places.slice(1).map(function(place) { return place.path; });
+		RecentFiles.scanFolders(folders);
+	}
+
 	// Listen to C++ background worker signals
 	Connections {
 		target: FileOperations
@@ -96,6 +106,73 @@ CutieWindow {
 							onClicked: mainWindow.openFolder(
 								mainWindow.places[index]["path"],
 								mainWindow.places[index]["text"]);
+						}
+					}
+				}
+
+				CutieLabel {
+					text: qsTr("Recent Files")
+					leftPadding: 20
+					topPadding: 16
+					bottomPadding: 6
+					font.pixelSize: 13
+					font.bold: true
+					opacity: 0.85
+				}
+
+				ListView {
+					id: recentFilesView
+					width: column.width
+					height: 80
+					orientation: ListView.Horizontal
+					spacing: 8
+					leftMargin: 16
+					clip: true
+					model: RecentFiles.entries
+
+					delegate: Rectangle {
+						width: 136
+						height: 64
+						radius: 8
+						color: Atmosphere.secondaryAlphaColor
+
+						Row {
+							anchors.fill: parent
+							anchors.margins: 8
+							spacing: 7
+
+							Image {
+								width: 24
+								height: 24
+								anchors.verticalCenter: parent.verticalCenter
+								source: "image://theme/text-x-generic-symbolic"
+								sourceSize.width: 24
+								sourceSize.height: 24
+							}
+
+							Column {
+								width: parent.width - 31
+								anchors.verticalCenter: parent.verticalCenter
+								spacing: 3
+
+								CutieLabel {
+									width: parent.width
+									text: modelData.name
+									elide: Text.ElideRight
+									font.pixelSize: 11
+								}
+								CutieLabel {
+									width: parent.width
+									text: Formatting.relativeTime(modelData.activityTime)
+									font.pixelSize: 10
+									opacity: 0.75
+								}
+							}
+						}
+
+						MouseArea {
+							anchors.fill: parent
+							onClicked: mainWindow.openFile(modelData.path)
 						}
 					}
 				}
