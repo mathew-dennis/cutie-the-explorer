@@ -130,54 +130,13 @@ CutieWindow {
 					clip: true
 					model: RecentFiles.entries
 
-					delegate: Rectangle {
+					delegate: CutieListItem {
 						width: 136
-						height: 64
-						radius: 8
-						color: Atmosphere.secondaryAlphaColor
-
-						Row {
-							anchors.fill: parent
-							anchors.margins: 8
-							spacing: 7
-
-							CutieButton {
-								width: 24
-								height: 24
-								anchors.verticalCenter: parent.verticalCenter
-								icon.name: "text-x-generic-symbolic"
-								icon.color: Atmosphere.textColor
-								icon.width: 24
-								icon.height: 24
-								background: null
-								enabled: false
-								padding: 0
-							}
-
-							Column {
-								width: parent.width - 31
-								anchors.verticalCenter: parent.verticalCenter
-								spacing: 3
-
-								CutieLabel {
-									width: parent.width
-									text: modelData.name
-									elide: Text.ElideRight
-									font.pixelSize: 11
-								}
-								CutieLabel {
-									width: parent.width
-									text: Formatting.relativeTime(modelData.activityTime)
-									font.pixelSize: 10
-									opacity: 0.75
-								}
-							}
-						}
-
-						MouseArea {
-							anchors.fill: parent
-							onClicked: mainWindow.openFile(modelData.path)
-						}
+						text: modelData.name
+						subText: Formatting.relativeTime(modelData.activityTime)
+						icon.name: "text-x-generic-symbolic"
+						icon.color: Atmosphere.textColor
+						onClicked: mainWindow.openFile(modelData.path)
 					}
 				}
 
@@ -210,26 +169,11 @@ CutieWindow {
 							width: parent.width - 40
 							spacing: 6
 
-							Row {
-								spacing: 10
-
-								CutieButton {
-									width: 20
-									height: 20
-									anchors.verticalCenter: parent.verticalCenter
-									icon.name: "drive-removable-media-symbolic"
-									icon.color: Atmosphere.textColor
-									icon.width: 20
-									icon.height: 20
-									background: null
-									enabled: false
-									padding: 0
-								}
-								CutieLabel {
-									anchors.verticalCenter: parent.verticalCenter
-									text: modelData.name
-									color: Atmosphere.textColor
-								}
+							CutieListItem {
+								width: parent.width
+								text: modelData.name
+								icon.name: "drive-removable-media-symbolic"
+								icon.color: Atmosphere.textColor
 							}
 
 							// Usage bar - white fill over a dim track,
