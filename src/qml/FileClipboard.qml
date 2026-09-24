@@ -9,22 +9,30 @@ import QtQuick
 QtObject {
 	id: clipboard
 
-	property string sourcePath: ""
+	property var sourcePaths: []
 	property string mode: ""          // "cut" | "copy" | ""
-	readonly property bool hasContent: sourcePath.length > 0
+	readonly property bool hasContent: sourcePaths.length > 0
 
 	function cut(path) {
-		clipboard.sourcePath = path;
-		clipboard.mode = "cut";
+		clipboard.cutMany([path]);
 	}
 
 	function copy(path) {
-		clipboard.sourcePath = path;
+		clipboard.copyMany([path]);
+	}
+
+	function cutMany(paths) {
+		clipboard.sourcePaths = paths.slice();
+		clipboard.mode = "cut";
+	}
+
+	function copyMany(paths) {
+		clipboard.sourcePaths = paths.slice();
 		clipboard.mode = "copy";
 	}
 
 	function clear() {
-		clipboard.sourcePath = "";
+		clipboard.sourcePaths = [];
 		clipboard.mode = "";
 	}
 }

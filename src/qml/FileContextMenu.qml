@@ -2,7 +2,7 @@ import Cutie
 import CutieExplorer
 import QtQuick
 
-// The 6-action context menu (Cut/Copy/Paste/Rename/Properties/Delete) for a
+// The file context menu (Open/Cut/Copy/Paste/Rename/Properties/Delete) for a
 // single file or folder entry. Shared by the list and grid delegates so
 // the action set only lives in one place.
 //
@@ -23,21 +23,7 @@ CutieMenu {
 	signal propertiesRequested(string name, string path, bool isDir, real size, var modified)
 	signal deleteRequested(string name, string path)
 	signal openRequested(string path)
-	signal pasteConflictRequested(string sourcePath, string destFolder, string mode)
-
-	function paste() {
-		if (FileOperations.destinationExists(FileClipboard.sourcePath, fileMenu.currentFolder)) {
-			fileMenu.pasteConflictRequested(FileClipboard.sourcePath,
-				fileMenu.currentFolder, FileClipboard.mode);
-			return;
-		}
-
-		if (FileClipboard.mode === "cut")
-			FileOperations.movePath(FileClipboard.sourcePath, fileMenu.currentFolder);
-		else
-			FileOperations.copyPath(FileClipboard.sourcePath, fileMenu.currentFolder);
-		FileClipboard.clear();
-	}
+	signal pasteRequested(string destFolder)
 
 	CutieMenuItem {
 		text: qsTr("Open")
@@ -55,7 +41,7 @@ CutieMenu {
 	CutieMenuItem {
 		text: qsTr("Paste")
 		enabled: FileClipboard.hasContent
-		onTriggered: fileMenu.paste()
+		onTriggered: fileMenu.pasteRequested(fileMenu.currentFolder)
 	}
 	CutieMenuItem {
 		text: qsTr("Delete")

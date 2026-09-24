@@ -23,6 +23,12 @@ CutiePage {
 	property string pendingPasteSource: ""
 	property string pendingPasteFolder: ""
 	property string pendingPasteMode: ""
+	property bool multiSelectMode: false
+	property var selectedPaths: []
+	property var pendingPastePaths: []
+	property int pendingPasteIndex: 0
+	property bool pasteQueueActive: false
+	property bool waitingForPasteDecision: false
 
 	// View mode persists via Qt.labs.settings, so it's remembered the next
 	// time the app opens - shared across all FolderView instances since
@@ -77,24 +83,98 @@ CutiePage {
 		deleteDialog.open();
 	}
 
-	function handlePasteConflict(sourcePath, destFolder, mode) {
-		pendingPasteSource = sourcePath;
-		pendingPasteFolder = destFolder;
-		pendingPasteMode = mode;
-		replaceDialog.open();
+	function isSelected(path) {
+		return selectedPaths.indexOf(path) !== -1;
 	}
 
-	function finishPaste(replace) {
-		if (replace) {
-			if (pendingPasteMode === "cut")
-				FileOperations.movePath(pendingPasteSource, pendingPasteFolder);
-			else
-				FileOperations.copyPath(pendingPasteSource, pendingPasteFolder);
+	function toggleSelected(path) {
+		var paths = selectedPaths.slice();
+		var index = paths.indexOf(path);
+		if (index === -1)
+			paths.push(path);
+		else
+			paths.splice(index, 1);
+		selectedPaths = paths;
+	}
+
+	function setSelectionClipboard(mode) {
+		if (selectedPaths.length === 0)
+			return;
+		if (mode === "cut")
+			FileClipboard.cutMany(selectedPaths);
+		else
+			FileClipboard.copyMany(selectedPaths);
+		multiSelectMode = false;
+		selectedPaths = [];
+	}
+
+	function startPaste(destFolder) {
+		if (pasteQueueActive || !FileClipboard.hasContent)
+			return;
+		pendingPastePaths = FileClipboard.sourcePaths.slice();
+		pendingPasteFolder = destFolder;
+		pendingPasteMode = FileClipboard.mode;
+		pendingPasteIndex = 0;
+		pasteQueueActive = true;
+		processNextPaste();
+	}
+
+	function processNextPaste() {
+		if (pendingPasteIndex >= pendingPastePaths.length) {
+			finishPasteQueue();
+			return;
 		}
+
+		pendingPasteSource = pendingPastePaths[pendingPasteIndex];
+		if (FileOperations.destinationExists(pendingPasteSource, pendingPasteFolder)) {
+			waitingForPasteDecision = true;
+			replaceDialog.open();
+			return;
+		}
+		startCurrentPaste();
+	}
+
+	function startCurrentPaste() {
+		var started = pendingPasteMode === "cut"
+			? FileOperations.movePath(pendingPasteSource, pendingPasteFolder)
+			: FileOperations.copyPath(pendingPasteSource, pendingPasteFolder);
+		if (!started)
+			advancePasteQueue();
+	}
+
+	function resolvePasteConflict(replace) {
+		if (!waitingForPasteDecision)
+			return;
+		waitingForPasteDecision = false;
+		replaceDialog.close();
+		if (replace)
+			startCurrentPaste();
+		else
+			advancePasteQueue();
+	}
+
+	function advancePasteQueue() {
+		pendingPasteIndex++;
+		Qt.callLater(processNextPaste);
+	}
+
+	function finishPasteQueue() {
+		pasteQueueActive = false;
 		FileClipboard.clear();
 		pendingPasteSource = "";
 		pendingPasteFolder = "";
 		pendingPasteMode = "";
+		pendingPastePaths = [];
+		pendingPasteIndex = 0;
+		waitingForPasteDecision = false;
+	}
+
+	Connections {
+		target: FileOperations
+		function onOperationFinished(success, message) {
+			if (folderView.pasteQueueActive)
+				folderView.advancePasteQueue();
+		}
 	}
 
 	FolderListModel {
@@ -128,6 +208,14 @@ CutiePage {
 
 			CutieMenu {
 				id: viewMenu
+				CutieMenuItem {
+					text: folderView.multiSelectMode ? qsTr("Finish selection") : qsTr("Select multiple")
+					onTriggered: {
+						folderView.multiSelectMode = !folderView.multiSelectMode;
+						if (!folderView.multiSelectMode)
+							folderView.selectedPaths = [];
+					}
+				}
 				CutieMenuItem {
 					text: qsTr("List view")
 					onTriggered: viewSettings.mode = "list"
@@ -186,6 +274,18 @@ CutiePage {
 		}
 	}
 
+	CutieMenu {
+		id: selectionMenu
+		CutieMenuItem {
+			text: qsTr("Copy selected")
+			onTriggered: folderView.setSelectionClipboard("copy")
+		}
+		CutieMenuItem {
+			text: qsTr("Cut selected")
+			onTriggered: folderView.setSelectionClipboard("cut")
+		}
+	}
+
 	// ── List view ────────────────────────────────────────────────────────
 	ListView {
 		id: listContent
@@ -205,14 +305,25 @@ CutiePage {
 				: qsTr("%1 | %2").arg(Formatting.humanSize(fileSize)).arg(Formatting.formatDate(fileModified))
 			icon.name: fileIsDir ? "folder-symbolic" : "text-x-generic-symbolic"
 			icon.color: Atmosphere.textColor
+			highlighted: folderView.multiSelectMode && folderView.isSelected(filePath)
 
 			onClicked: {
-				if (fileIsDir)
+				if (folderView.multiSelectMode)
+					folderView.toggleSelected(filePath);
+				else if (fileIsDir)
 					folderView.openChild(filePath, fileName);
 				else
 					mainWindow.openFile(filePath);
 			}
-			onPressAndHold: listMenu.open()
+			onPressAndHold: {
+				if (folderView.multiSelectMode) {
+					if (!folderView.isSelected(filePath))
+						folderView.toggleSelected(filePath);
+					selectionMenu.open();
+				} else {
+					listMenu.open();
+				}
+			}
 
 			FileContextMenu {
 				id: listMenu
@@ -226,7 +337,7 @@ CutiePage {
 				onPropertiesRequested: folderView.handleProperties(name, path, isDir, size, modified)
 				onDeleteRequested: folderView.handleDelete(name, path)
 				onOpenRequested: mainWindow.openFile(path)
-				onPasteConflictRequested: folderView.handlePasteConflict(sourcePath, destFolder, mode)
+				onPasteRequested: folderView.startPaste(destFolder)
 			}
 		}
 	}
@@ -248,6 +359,14 @@ CutiePage {
 			width: gridContent.cellWidth
 			height: gridContent.cellHeight
 
+			Rectangle {
+				anchors.fill: parent
+				radius: 8
+				color: Atmosphere.secondaryAlphaColor
+				opacity: 0.4
+				visible: folderView.multiSelectMode && folderView.isSelected(filePath)
+			}
+
 			Column {
 				anchors.centerIn: parent
 				spacing: 6
@@ -267,16 +386,25 @@ CutiePage {
 					font.pixelSize: 12
 				}
 			}
-
 			MouseArea {
 				anchors.fill: parent
 				onClicked: {
-					if (fileIsDir)
+					if (folderView.multiSelectMode)
+						folderView.toggleSelected(filePath);
+					else if (fileIsDir)
 						folderView.openChild(filePath, fileName);
 					else
 						mainWindow.openFile(filePath);
 				}
-				onPressAndHold: gridMenu.open()
+				onPressAndHold: {
+					if (folderView.multiSelectMode) {
+						if (!folderView.isSelected(filePath))
+							folderView.toggleSelected(filePath);
+						selectionMenu.open();
+					} else {
+						gridMenu.open();
+					}
+				}
 			}
 
 			FileContextMenu {
@@ -291,7 +419,7 @@ CutiePage {
 				onPropertiesRequested: folderView.handleProperties(name, path, isDir, size, modified)
 				onDeleteRequested: folderView.handleDelete(name, path)
 				onOpenRequested: mainWindow.openFile(path)
-				onPasteConflictRequested: folderView.handlePasteConflict(sourcePath, destFolder, mode)
+				onPasteRequested: folderView.startPaste(destFolder)
 			}
 		}
 	}
@@ -330,6 +458,7 @@ CutiePage {
 		title: qsTr("File already exists")
 		modal: true
 		anchors.centerIn: parent
+		onRejected: folderView.resolvePasteConflict(false)
 
 		contentItem: CutieLabel {
 			text: qsTr("'%1' already exists here. Replace it or skip this paste?")
@@ -343,16 +472,14 @@ CutiePage {
 				text: qsTr("Skip")
 				DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
 				onClicked: {
-					folderView.finishPaste(false);
-					replaceDialog.close();
+					folderView.resolvePasteConflict(false);
 				}
 			}
 			Button {
 				text: qsTr("Replace")
 				DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
 				onClicked: {
-					folderView.finishPaste(true);
-					replaceDialog.close();
+					folderView.resolvePasteConflict(true);
 				}
 			}
 		}
