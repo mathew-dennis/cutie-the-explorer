@@ -279,7 +279,8 @@ CutieWindow {
 	Rectangle {
 		id: progressCard
 		visible: mainWindow.isTransferring
-		
+		opacity: 0.9
+
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 24
 		anchors.left: parent.left
