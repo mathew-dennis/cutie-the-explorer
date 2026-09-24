@@ -19,7 +19,7 @@ CutieWindow {
         Atmosphere.secondaryAlphaColor.b,
         0.1
     )
-	
+
 	property var folderComponent: Qt.createComponent("FolderView.qml")
 
 	// State properties to track background file operations
@@ -143,7 +143,7 @@ CutieWindow {
 						width: 136
 						height: 64
 						radius: 8
-						color: Atmosphere.secondaryAlphaLightColor
+						color: secondaryAlphaLightColor
 
 						Row {
 							anchors.fill: parent
