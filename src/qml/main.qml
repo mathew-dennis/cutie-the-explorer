@@ -28,6 +28,9 @@ CutieWindow {
 	property real transferBytesTotal: 0
 	property int transferFilesCopied: 0
 	property int transferFilesTotal: 0
+	property bool pasteBatchActive: false
+	property int pasteBatchIndex: 0
+	property int pasteBatchCount: 0
 
 	// Quick-access shortcuts - the standard XDG user directories
 	property var places: [
@@ -77,7 +80,7 @@ CutieWindow {
 		}
 		
 		function onOperationFinished(success, message) {
-			mainWindow.isTransferring = false;
+			mainWindow.isTransferring = mainWindow.pasteBatchActive;
 			// Optional: Trigger a Cutie toast notification here if success === false
 		}
 	}
@@ -297,9 +300,13 @@ CutieWindow {
 			spacing: 10
 
 			CutieLabel {
-				text: qsTr("Transferring %1 of %2 items")
-					.arg(mainWindow.transferFilesCopied)
-					.arg(mainWindow.transferFilesTotal)
+				text: mainWindow.pasteBatchActive
+					? qsTr("Transferring item %1 of %2")
+						.arg(mainWindow.pasteBatchIndex + 1)
+						.arg(mainWindow.pasteBatchCount)
+					: qsTr("Transferring %1 of %2 items")
+						.arg(mainWindow.transferFilesCopied)
+						.arg(mainWindow.transferFilesTotal)
 				font.bold: true
 				color: Atmosphere.textColor
 			}

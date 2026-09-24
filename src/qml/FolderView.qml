@@ -116,6 +116,10 @@ CutiePage {
 		pendingPasteMode = FileClipboard.mode;
 		pendingPasteIndex = 0;
 		pasteQueueActive = true;
+		mainWindow.pasteBatchActive = true;
+		mainWindow.pasteBatchCount = pendingPastePaths.length;
+		mainWindow.pasteBatchIndex = 0;
+		mainWindow.isTransferring = true;
 		processNextPaste();
 	}
 
@@ -125,6 +129,7 @@ CutiePage {
 			return;
 		}
 
+		mainWindow.pasteBatchIndex = pendingPasteIndex;
 		pendingPasteSource = pendingPastePaths[pendingPasteIndex];
 		if (FileOperations.destinationExists(pendingPasteSource, pendingPasteFolder)) {
 			waitingForPasteDecision = true;
@@ -160,6 +165,10 @@ CutiePage {
 
 	function finishPasteQueue() {
 		pasteQueueActive = false;
+		mainWindow.pasteBatchActive = false;
+		mainWindow.isTransferring = false;
+		mainWindow.pasteBatchIndex = 0;
+		mainWindow.pasteBatchCount = 0;
 		FileClipboard.clear();
 		pendingPasteSource = "";
 		pendingPasteFolder = "";
