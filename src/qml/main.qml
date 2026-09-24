@@ -279,7 +279,7 @@ CutieWindow {
 	Rectangle {
 		id: progressCard
 		visible: mainWindow.isTransferring
-		opacity: 0.9
+		
 
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 24
@@ -290,7 +290,7 @@ CutieWindow {
 		height: progressColumn.height + 24
 		radius: 12
 		
-		color: Atmosphere.secondaryAlphaColor
+		color: red
 		border.color: Atmosphere.primaryAlphaColor
 		border.width: 1
 
