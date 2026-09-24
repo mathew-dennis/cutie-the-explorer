@@ -2,6 +2,7 @@ import Cutie
 import CutieExplorer
 import Qt.labs.platform as Labs
 import QtQuick
+import QtQuick.Controls
 import "Formatting.js" as Formatting
 
 CutieWindow {
@@ -141,13 +142,12 @@ CutieWindow {
 							anchors.margins: 8
 							spacing: 7
 
-							Image {
+							IconImage {
 								width: 24
 								height: 24
 								anchors.verticalCenter: parent.verticalCenter
-								source: "image://theme/text-x-generic-symbolic"
-								sourceSize.width: 24
-								sourceSize.height: 24
+								name: "text-x-generic-symbolic"
+								color: Atmosphere.textColor
 							}
 
 							Column {
@@ -209,11 +209,12 @@ CutieWindow {
 							Row {
 								spacing: 10
 
-								Image {
+								IconImage {
+									width: 20
+									height: 20
 									anchors.verticalCenter: parent.verticalCenter
-									source: "image://theme/drive-removable-media-symbolic"
-									sourceSize.width: 20
-									sourceSize.height: 20
+									name: "drive-removable-media-symbolic"
+									color: Atmosphere.textColor
 								}
 								CutieLabel {
 									anchors.verticalCenter: parent.verticalCenter
@@ -228,7 +229,7 @@ CutieWindow {
 								width: parent.width
 								height: 6
 								radius: 3
-								color:  Atmosphere.primaryAlphaColor
+								color: Atmosphere.primaryAlphaColor
 								opacity: 1
 
 								Rectangle {
