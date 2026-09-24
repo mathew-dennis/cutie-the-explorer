@@ -286,6 +286,15 @@ CutiePage {
 		}
 	}
 
+	CutieMenu {
+		id: emptyFolderMenu
+		CutieMenuItem {
+			text: qsTr("Paste")
+			enabled: FileClipboard.hasContent
+			onTriggered: folderView.startPaste(folderView.folderPath)
+		}
+	}
+
 	// ── List view ────────────────────────────────────────────────────────
 	ListView {
 		id: listContent
@@ -339,6 +348,12 @@ CutiePage {
 				onOpenRequested: mainWindow.openFile(path)
 				onPasteRequested: folderView.startPaste(destFolder)
 			}
+		}
+
+		MouseArea {
+			anchors.fill: parent
+			enabled: dirModel.count === 0
+			onClicked: emptyFolderMenu.open()
 		}
 	}
 
@@ -421,6 +436,12 @@ CutiePage {
 				onOpenRequested: mainWindow.openFile(path)
 				onPasteRequested: folderView.startPaste(destFolder)
 			}
+		}
+
+		MouseArea {
+			anchors.fill: parent
+			enabled: dirModel.count === 0
+			onClicked: emptyFolderMenu.open()
 		}
 	}
 
