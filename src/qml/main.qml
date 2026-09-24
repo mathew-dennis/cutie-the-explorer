@@ -12,7 +12,13 @@ CutieWindow {
 	height: 800
 	visible: true
 	title: qsTr("Files")
-
+	
+    readonly property color secondaryAlphaLightColor: Qt.rgba(
+        Atmosphere.secondaryAlphaColor.r,
+        Atmosphere.secondaryAlphaColor.g,
+        Atmosphere.secondaryAlphaColor.b,
+        0.1
+    )
 	property var folderComponent: Qt.createComponent("FolderView.qml")
 
 	// State properties to track background file operations
@@ -136,7 +142,7 @@ CutieWindow {
 						width: 136
 						height: 64
 						radius: 8
-						color: Atmosphere.secondaryAlphaColor
+						color: Atmosphere.secondaryAlphaLightColor
 
 						Row {
 							anchors.fill: parent
