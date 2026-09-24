@@ -3,6 +3,7 @@ import CutieExplorer
 import Qt.labs.platform as Labs
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import "Formatting.js" as Formatting
 
 CutieWindow {
