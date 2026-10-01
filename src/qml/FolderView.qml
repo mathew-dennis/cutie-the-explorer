@@ -4,6 +4,7 @@ import Qt.labs.folderlistmodel
 import Qt.labs.settings
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import "Formatting.js" as Formatting
 
 CutiePage {
@@ -395,11 +396,12 @@ CutiePage {
 				anchors.centerIn: parent
 				spacing: 6
 
-				Image {
+				IconImage {
 					anchors.horizontalCenter: parent.horizontalCenter
-					source: "image://theme/" + (fileIsDir ? "folder" : "text-x-generic")
-					sourceSize.width: 64
-					sourceSize.height: 64
+					width: 64
+					height: 64
+					name: fileIsDir ? "folder-symbolic" : "text-x-generic-symbolic"
+					color: Atmosphere.textColor
 				}
 
 				CutieLabel {
