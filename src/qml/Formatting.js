@@ -26,7 +26,7 @@ function humanSize(bytes) {
 }
 
 function formatDate(date) {
-	if (!date)
+	if (!date || !date.getTime || isNaN(date.getTime()))
 		return "";
 	return Qt.formatDateTime(date, "dd/MM/yy h:mm ap");
 }

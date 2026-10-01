@@ -1,7 +1,7 @@
 import Cutie
 import CutieExplorer
 import Qt.labs.folderlistmodel
-import Qt.labs.settings
+import QtCore
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.impl
@@ -462,6 +462,7 @@ CutiePage {
 
 	PropertiesDialog {
 		id: propertiesDialog
+		width: 300
 	}
 
 	Dialog {
@@ -470,6 +471,7 @@ CutiePage {
 		modal: true
 		standardButtons: Dialog.Yes | Dialog.No
 		anchors.centerIn: parent
+		width: 300
 
 		property string targetName: ""
 		property string targetPath: ""
@@ -490,6 +492,7 @@ CutiePage {
 		title: qsTr("File already exists")
 		modal: true
 		anchors.centerIn: parent
+		width: 300
 		onRejected: folderView.resolvePasteConflict(false)
 
 		contentItem: CutieLabel {

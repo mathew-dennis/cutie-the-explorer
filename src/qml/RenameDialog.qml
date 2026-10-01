@@ -8,6 +8,7 @@ Dialog {
 	modal: true
 	standardButtons: Dialog.Ok | Dialog.Cancel
 	anchors.centerIn: parent
+	width: 300
 
 	property string targetPath: ""
 

@@ -10,6 +10,7 @@ Dialog {
 	modal: true
 	standardButtons: Dialog.Ok
 	anchors.centerIn: parent
+	width: 300
 
 	property string fileName: ""
 	property string filePath: ""
@@ -40,8 +41,8 @@ Dialog {
 			text: qsTr("Size: %1").arg(Formatting.humanSize(propertiesDialog.fileSize))
 		}
 		CutieLabel {
-			visible: propertiesDialog.fileModified !== undefined
-			text: qsTr("Modified: %1").arg(Qt.formatDateTime(propertiesDialog.fileModified, "yyyy-MM-dd hh:mm"))
+			visible: Formatting.formatDate(propertiesDialog.fileModified) !== ""
+			text: qsTr("Modified: %1").arg(Formatting.formatDate(propertiesDialog.fileModified))
 		}
 	}
 }

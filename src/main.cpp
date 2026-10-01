@@ -17,6 +17,9 @@ int main(int argc, char *argv[])
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 	QGuiApplication app(argc, argv);
+	QCoreApplication::setOrganizationName(QStringLiteral("Cutie"));
+	QCoreApplication::setOrganizationDomain(QStringLiteral("cutie-shell.org"));
+	QCoreApplication::setApplicationName(QStringLiteral("Cutie Explorer"));
 	QString locale = QLocale::system().name();
 	QTranslator translator;
 	(void)translator.load(QString(":/i18n/cutie-explorer_") + locale);
